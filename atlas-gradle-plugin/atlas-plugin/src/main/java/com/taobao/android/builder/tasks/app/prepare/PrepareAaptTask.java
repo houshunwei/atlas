@@ -218,10 +218,9 @@ import com.android.build.gradle.internal.api.AppVariantContext;
 import com.android.build.gradle.internal.dsl.AaptOptions;
 import com.android.build.gradle.internal.tasks.BaseTask;
 import com.android.build.gradle.internal.variant.BaseVariantOutputData;
-import com.android.build.gradle.tasks.MergeResources;
 import com.android.build.gradle.tasks.ProcessAndroidResources;
-import com.taobao.android.builder.AtlasBuildContext;
 import com.taobao.android.builder.tasks.manager.MtlBaseTaskAction;
+
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -229,11 +228,10 @@ import java.util.ArrayList;
 
 public class PrepareAaptTask extends BaseTask {
 
-
     AppVariantContext appVariantContext;
+
     ProcessAndroidResources processAndroidResources;
     //MergeResources mergeResources;
-
 
     @TaskAction
     public void doExecute() {
@@ -261,13 +259,15 @@ public class PrepareAaptTask extends BaseTask {
                 aaptOptions.getAdditionalParameters().add("-B");
                 aaptOptions.getAdditionalParameters().add(baseApk.getAbsolutePath());
             }
+            if (appVariantContext.getAtlasExtension().getTBuildConfig().isIncremental()) {
+                aaptOptions.getAdditionalParameters().add("--merge");
+            }
             //AndroidManifest文件不能有修改OR在patch的时候忽略,目前选择在patch的时候忽略
         }
 
         //TODO update merge resource
         //mergeResources.setAndroidBuilder(AtlasBuildContext.androidBuilder);
     }
-
 
     public static class ConfigAction extends MtlBaseTaskAction<PrepareAaptTask> {
 
@@ -293,7 +293,7 @@ public class PrepareAaptTask extends BaseTask {
 
             super.execute(prepareAaptTask);
 
-            if (!appVariantContext.getAtlasExtension().getTBuildConfig().getUseCustomAapt() ){
+            if (!appVariantContext.getAtlasExtension().getTBuildConfig().getUseCustomAapt()) {
                 prepareAaptTask.setEnabled(false);
                 return;
             }
@@ -303,9 +303,6 @@ public class PrepareAaptTask extends BaseTask {
 
             //prepareAaptTask.mergeResources = appVariantContext.getVariantData().mergeResourcesTask;
 
-
         }
     }
-
-
 }
